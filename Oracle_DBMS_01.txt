@@ -1,0 +1,153 @@
+
+select sysdate, to_char(sysdate, 'yyyymmdd day')
+from dual;
+
+select orderid "주문번호", to_char(orderdate, 'yyyy-mm-dd dy') "주문일",
+    custid "고객번호", bookid "도서번호"
+from orders
+where orderdate=to_date('20200707', 'yyyymmdd');
+
+select SYSDATE
+        to_char(SYSDATE, 'yyyy/mm/dd dy hh24:mi:ss') "SYSDATE_1"
+from dual;
+
+select price+100
+from Mybook
+where bookid=3;
+
+select sum(price), avg(price), count(*), count(price)
+from Mybook;
+
+select sum(price), avg(price), count(*)
+from Mybook
+where bookid>=4;
+
+select rownum "rownum", custid, name, phone
+from Custmer
+where rownum <=2;
+
+select rownum "순번", custid, name, phone
+from customer
+where rownum <=2
+order by name;
+
+select rownum "순번", custid, name, phone
+from (select custid, name, phone
+        from customer
+        order by name)
+where rownum <=2;
+
+select orderid, saleprice
+from orders
+where saleprice <= (select avg(saleprice)
+                    from orders);
+                    
+select orderid, saleprice
+from orders
+where saleprice <= (select sum(saleprice)
+                    from orders);
+                    
+select orderid, custid, saleprice
+from orders md
+where saleprice > (select avg(saleprice)
+                    from orders so
+                    where md.custid=so.custid);
+                    
+select orderid, custid, saleprice
+from orders so
+where saleprice > (select avg(saleprice)
+                    from orders md
+                    where so.custid=md.custid);
+                    
+select orderid, custid, saleprice
+from orders md
+where saleprice > (select avg(saleprice)
+                    from orders md
+                    where md.custid=md.custid);                    
+
+select sum(saleprice) "total"
+from orders
+where custid IN (select custid from customer where address like '%대한민국%');
+                    
+select sum(saleprice) "total"
+from orders
+where custid NOT IN (select custid from customer where address like '%대한민국%');
+
+select orderid, saleprice
+from orders
+where saleprice > all (select saleprice from orders where custid=3);
+
+select orderid, saleprice
+from orders
+where saleprice > (select saleprice from orders where custid=3);
+
+select orderid, saleprice
+from orders
+where saleprice all (select saleprice from orders where custid=3);
+
+select sum(saleprice) "total"
+from orders od
+where exists (select * from customer cs where address like '%대한민국%' and cs.custid = od.custid);
+
+select sum(saleprice) "total"
+from orders od
+where not exists (select * from customer cs where address like '%대한민국%' and cs.custid = od.custid);
+
+alter table orders add bookname varchar2(40);
+
+select (select name from customer cs where cs.custid=od.custid) "name", sum(saleprice) "total"
+from orders od
+group by od.custid;
+
+select (select name from customer cs where cs.custid=od.custid) "name", sum(saleprice) "total"
+from orders od
+group by od.custid;
+
+update orders
+set bookname=(select bookname from book where book.bookid=orders.bookid);
+
+select * from orders;
+
+select cs.name, sum(saleprice)
+from (select custid, name from customer where custid <= 2) cs, orders od
+where cs.custid=od.custid
+group by cs.name;
+
+create view vw_customer
+as select * from customer where address like '%대한민국%';
+
+select * from vw_book;
+
+create view vw_book
+as select * from book where bookname like '%축구%';
+
+select * from vw_book;
+
+create view v_HJL
+as select * from customer where address like '%대한민국%';
+
+select * from v_HJL;
+
+
+create view vw_orders (orderid, custid, name, bookid, bookname, saleprice, orderdate)
+as select 1.orderid, 1.custid, 2.name, 1.bookid, 3.bookname, 1.saleprice, 1.orderdate
+from orders 1, customer 2, book 3
+where 1.custid=2.custid and 1.bookid=3.bookid;
+
+create view vw_orders (orderid, custid, name, bookid, bookname, saleprice, orderdate)
+as select od.orderid, od.custid, cs.name, od.bookid, bk.bookname, od.saleprice, od.orderdate
+from orders od, customer cs, book bk
+where od.custid=cs.custid and od.bookid=bk.bookid;
+
+create or replace view v_HJL (custid, name, address)
+as select custid, name, address from customer where address like '%영국%';
+
+select * from v_HJL;
+
+drop view v_HJL;
+
+drop view vw_customer;
+
+
+
+
