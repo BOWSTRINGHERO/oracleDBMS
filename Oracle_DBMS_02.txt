@@ -1,0 +1,11 @@
+create index ix_book on book (bookname);
+
+create index ix_book2 on book (publisher, price);
+
+select *
+from book
+where publisher='대한미디어' and price >=30000;
+
+alter index ix_book rebuild;
+
+drop index ix_book;
