@@ -1,0 +1,85 @@
+create or replace procedure insertbook(
+    mybookid in number,
+    mybookname in varchar2,
+    mypublisher in varchar2,
+    myprice in number)
+as
+begin
+    insert into book(bookid, bookname, publisher, price)
+    values(mybookid, mybookname, mypublisher, myprice);
+end;
+
+exec insertbook(13, '스포츠과학', '마당과학서적', 25000);
+select * from book;
+
+create or replace procedure averageprice(
+averageval out number)
+as
+begin
+select avg(price) into averageval from book where price is not null;
+end;
+
+set serveroutput on;
+declare
+averageval number;
+begin
+averageprice(averageval);
+dbms_output.put_line('책값 평균: '||averageval);
+end;
+
+create or replace procedure interest
+as
+myinterest numeric;
+price numeric;
+cursor interestcursor is select saleprice from orders;
+begin
+myinterest :=0.0;
+open interestcursor;
+loop
+fetch interestcursor into price;
+exit when interestcursor%notfount;
+if price >=30000 then
+myinterest :=myinterest + price * 0.1;
+else
+myinterest := myinterest + price *0.05;
+end if;
+end loop;
+close interestcursor;
+dbms_output.put_line('전체 이익 금액 = '||myinterest);
+end;
+
+create table book_log(
+bookid_1 number,
+bookname_1 varchar2(40),
+publisher_1 varchar2(40),
+price_1 number);
+
+create or replace trigger afterinsertbook
+after insert on book for each row
+declare
+average number;
+begin
+insert into book_log
+values(:new.bookid, :new.bookname, :new.publisher, :new.price);
+dbms_output.put_line('삽입 투플을 book_log 테이블에 백업..');
+end;
+
+
+insert into book values(15, '스포츠 과학 1', '이상미디어', 25000);
+select * from book where bookid='15';
+select * from book_log where bookid_l = '14';
+
+
+create or replace function fnc_interest(
+price number) return int
+is
+myinterest number;
+begin
+if price >=30000 then myinterest := price * 0.1;
+else myinterest := price * 0.05;
+end if;
+return myinterest;
+end;
+
+select custid, orderid, saleprice, fnc_interest(saleprice) interest
+from orders;
